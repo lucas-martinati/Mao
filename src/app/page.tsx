@@ -23,7 +23,7 @@ export default function LobbyPage() {
     }
     localStorage.setItem("mao_player_name", playerName.trim());
 
-    router.push(`/game/${roomCode.trim().toUpperCase()}`);
+    router.push(`/game?code=${roomCode.trim().toUpperCase()}`);
   };
 
   return (

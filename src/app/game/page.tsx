@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     GameState,
@@ -13,9 +13,13 @@ import {
 } from "@/lib/gameService";
 import GameBoard from "@/components/GameBoard";
 
-export default function GamePage() {
+function GameContent() {
+    const searchParams = useSearchParams();
     const params = useParams();
-    const roomCode = (params.code as string) || "";
+    const codeFromQuery = searchParams.get("code") || "";
+    const codeFromParams = (params?.code as string) || "";
+    const roomCode = (codeFromQuery || codeFromParams || "").trim().toUpperCase();
+
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [playerId, setPlayerId] = useState<string>("");
     const [joining, setJoining] = useState(true);
@@ -24,6 +28,12 @@ export default function GamePage() {
 
     // Join room on mount
     useEffect(() => {
+        if (!roomCode) {
+            setError("Code de partie manquant.");
+            setJoining(false);
+            return;
+        }
+
         const pid = localStorage.getItem("mao_player_id");
         const pname = localStorage.getItem("mao_player_name");
 
@@ -56,11 +66,13 @@ export default function GamePage() {
     }, [roomCode, joining]);
 
     const handleStartGame = useCallback(() => {
+        if (!roomCode) return;
         startGame(roomCode, selectedDecks);
     }, [roomCode, selectedDecks]);
 
     const handleDeckChange = useCallback(
         (num: number) => {
+            if (!roomCode) return;
             setSelectedDecks(num);
             setNumDecks(roomCode, num);
         },
@@ -74,7 +86,7 @@ export default function GamePage() {
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="text-4xl"
+                    className="text-4xl text-gold-400"
                 >
                     ♠
                 </motion.div>
@@ -267,5 +279,19 @@ export default function GamePage() {
             playerId={playerId}
             gameState={gameState}
         />
+    );
+}
+
+export default function GamePage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen flex items-center justify-center felt-texture">
+                    <div className="text-4xl text-gold-400 animate-spin">♠</div>
+                </div>
+            }
+        >
+            <GameContent />
+        </Suspense>
     );
 }

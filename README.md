@@ -15,3 +15,13 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Déploiement (Firebase Hosting)
+
+Pour construire le projet et le déployer sur Firebase Hosting :
+
+```bash
+npm run deploy
+```
+
+L'application est hébergée sur [https://mao-game.web.app](https://mao-game.web.app).
